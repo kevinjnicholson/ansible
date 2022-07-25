@@ -1,0 +1,27 @@
+---
+##  Original Author: K Nicholson 
+##  Date           : 19/07/2022
+##  Desc           : Playbook to grant admin access to AAP controller UI
+##  Ansible Version: 2.9 at least
+
+- name: Add Controller Admin Privileges To Users 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+ 
+  tasks:
+  - name: Update [AUTH_LDAP_USER_FLAGS_BY_GROUP] To Grant Admin Access
+    ansible.controller.settings:
+      settings:
+        AUTH_LDAP_USER_FLAGS_BY_GROUP:
+          is_superuser: ""
+
+  - name: Pause Play To Allow Engineer Admin Logon
+    pause:
+      seconds: 20
+
+  - name: Update [AUTH_LDAP_USER_FLAGS_BY_GROUP] To Remove Admin Access
+    ansible.controller.settings:
+      settings: 
+        AUTH_LDAP_USER_FLAGS_BY_GROUP:
+          is_superuser: ""
