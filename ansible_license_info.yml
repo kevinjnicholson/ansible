@@ -1,0 +1,33 @@
+---
+##  Original Author: K Nicholson 
+##  Date           : 19/07/2022
+##  Desc           : Playbook to collect AAP license information
+##  Ansible Version: 2.9 at least
+
+- name: Gather AAP License Information
+  hosts: localhost
+  gather_facts: no
+  vars:
+    controller_host: '{{ lookup("env", "CONTROLLER_HOST") }}'
+
+  tasks:
+    - name: Collect AAP License Informaion
+      uri:
+        url: "{{ controller_host }}/api/v2/config/?format=json"
+        return_content: yes
+        validate_certs: no
+        force_basic_auth: yes
+        user: '{{ lookup("env", "CONTROLLER_USERNAME") }}'
+        password: '{{ lookup("env", "CONTROLLER_PASSWORD") }}'
+      register: lic_detail
+      run_once: true
+      no_log: true
+
+    - name: Print AAP License Information
+      debug: 
+        msg:
+          - AAP License Information
+          - "License Count - {{ lic_detail.json.license_info.instance_count }}"
+          - "Imported Instances - {{ lic_detail.json.license_info.current_instances }}"
+          - "Automated Instances - {{ lic_detail.json.license_info.automated_instances }}"
+          - "Free Licenses - {{ lic_detail.json.license_info.free_instances }}"
