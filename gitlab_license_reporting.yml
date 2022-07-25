@@ -1,0 +1,29 @@
+---
+##  Original Author: K Nicholson 
+##  Date           : 19/07/2022
+##  Desc           : Playbook to gather number of active users in Gitlab 
+##  Ansible Version: 2.9 at least
+
+- name: Gitlab Active User Reporting
+  hosts: GITLAB
+  gather_facts: yes
+  become: yes
+
+  tasks:
+
+    - name: Set Vars From The Controller Extra Environment VARS
+      set_fact:
+        gitlab_url: "{{ lookup('env', 'GITLAB_URL') }}"
+
+    - name: Get Number Of Active Users Using A SEAT From Gitlab API
+      uri:
+        url: "{{ gitlab_url }}/api/v4/users?active=true&exclude_internal=true&without_project_bots=true"
+        method: GET
+        body_format: json
+        headers:
+           PRIVATE-TOKEN: '{{ lookup("env", "GITLAB_TOKEN") }}'
+      register: active_users
+
+    - name: Print Number Of Active Users Using A SEAT
+      debug:
+        var: active_users.x_total
